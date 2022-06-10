@@ -8,7 +8,7 @@ on: #for event triggering
 jobs: #job to execute
   build: # name of the job
     name: Load OS
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - name: Print hello
       run: | #run terminal cmd
@@ -46,6 +46,23 @@ jobs: #job to execute
         go mod init calc # for go mod, if you use go build, it will do the same for the 3 lines.
         go mod tidy
         go get github.com/franela/goblin
+        go get github.com/tebeka/go2xunit
         go test -v
-
+        go test -v | go2xunit -output tests.xml
       
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/composite@v1
+      if: always()
+      with:
+        files: "tests.xml"
+        
+    - if: ${{ failure() }}
+      uses: nashmaniac/create-issue-action@v1.1
+      name: Create Issue Action
+      with:
+        title: Build Failed
+        token: ${{secrets.GITHUB_TOKEN}}
+        assignees: ${{github.actor}}
+        labels: worflow-failed
+        body: Workflow failed for commit ${{github.sha}}
