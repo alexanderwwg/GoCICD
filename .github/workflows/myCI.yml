@@ -37,7 +37,6 @@ jobs: #job to execute
         cd remote
         ls 
         cat myText.txt
-        cd..
       
     - name: Check File System
       run: ls
